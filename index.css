@@ -1,0 +1,32 @@
+html {
+	margin: 0px;
+	padding: 0px;
+}
+head{
+	margin: 0px;
+	padding: 0px;
+}
+
+body{
+	margin: 0px;
+	padding: 0px;
+	overflow: hidden;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	height: 100%;
+	width: 100%;
+}
+
+canvas {
+	border: 0px solid black;
+	margin: 0px;
+	padding: 0px;
+	background-color: #FFFFFF;
+	display: block;
+	position: absolute;
+	z-index: 1;
+	height: 100%;
+	width: 100%;
+	top: 0px;
+}
