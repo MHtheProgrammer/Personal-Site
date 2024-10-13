@@ -1,8 +1,9 @@
-//////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 //
-//  MV.js
+//  GraphicsMath.js - Given as a resource by the Computer Graphics graduate course
+//  at Rutgers university, modified by me whenever I needed more tools
 //
-//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 
 //----------------------------------------------------------------------------
 
@@ -35,6 +36,10 @@ function isMatrix(v) {
 
 function radians( degrees ) {
     return degrees * Math.PI / 180.0;
+}
+
+function degrees( radians ) {
+  return radians * (180 / Math.PI);
 }
 
 //----------------------------------------------------------------------------
@@ -493,6 +498,25 @@ function translate( x, y, z )
 
       return result;
 
+}
+
+function distance(vecA, vecB) {
+  return Math.sqrt(Math.pow(vecB[0] - vecA[0], 2) + Math.pow(vecB[1] - vecA[1], 2));
+}
+
+function angleBetween(vecA, vecB) {
+  return Math.atan2((vecA[0]*vecB[1])-(vecA[1]*vecB[0]), (vecA[0]*vecB[0])+(vecA[1]*vecB[1]));
+}
+
+function rotate2dRadians(angle, vector) {
+  if (vector.type != 'vec2') throw "rotate: vector is not a vec2";
+  var result = new Array(2);
+  result.type = 'vec2';
+  let cos = Math.cos(angle);
+  let sin = Math.sin(angle);
+  result[0] = (cos * vector[0]) - (sin * vector[1]);
+  result[1] = (sin * vector[0]) + (cos * vector[1]);
+  return result;
 }
 
 function rotate2d(angle, vector) {
