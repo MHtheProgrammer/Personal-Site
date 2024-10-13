@@ -11,7 +11,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 var mousePosX = 0;
 var mousePosY = 0;
-
+var boolAnimate = true;
 
 window.onload = function() {
     c.fillStyle = "#243642";
@@ -35,13 +35,22 @@ window.onload = function() {
     console.log("B,C: "+angleBetween(vec2(1,1), subtract(C, B)));
     console.log("B,D: "+angleBetween(vec2(1,1), subtract(D, B)));
     console.log("B,E: "+angleBetween(vec2(1,1), subtract(E, B)));
-    console.log("rotate: " + rotate2d(45, vec2(1,0)));
+    console.log("rotate: " + rotate2d(Math.PI/4, vec2(1,0)));
 }
 
 window.addEventListener("mousemove", event => {
 	mousePosX = event.clientX - canvas.clientLeft;
 	mousePosY = event.clientY - canvas.clientTop;
 });
+
+window.addEventListener("keydown", (event) => {
+    if (event.code = 32) {
+        boolAnimate = !boolAnimate;
+        console.log("space pressed");
+    }
+});
+
+onkeydown = (event) => {};
 
 // =============================================================================
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -51,8 +60,9 @@ window.addEventListener("mousemove", event => {
 const KOI_LENGTH = 6; // Length of koi
 const KOI_BODY_SIZES = [40, 40, 40, 40, 40, 40]; // Adjusts Koi body sizes
 const KOI_DIRECTION_CHANGE_FREQUENCY = 300; // Higher number is less frequent
-const KOI_DEFAULT_SPEED = 3;
-const KOI_MAX_ROTATION = 4; // Max degrees of rotation per frame
+const KOI_DEFAULT_SPEED = 4;
+const KOI_MAX_ROTATION = radians(4); // Max degrees of rotation per frame
+const KOI_BODY_MAX_ANGLE = Math.PI * (4/5); // Max angle 2 vertices can be angled at
 const INNER_CIRCLE_RADIUS = 8; // for debug
 const INNER_STROKE_WIDTH = 4; // for debug
 const OUTER_STROKE_WIDTH = 1; // for debug
@@ -78,6 +88,8 @@ class Koi {
     desiredRotationAngle; // Total rotation desired until we stop rotating (this number will approach zero as we rotate)
     desiredLocation = vec2(1,1); // vec2 coords of point on screen to travel to
 
+    setDesiredLocation(newPoint) { this.desiredLocation = newPoint; }
+
     /**
      * Creates a Koi fish object
      * @param {*} head vec2 - head of the koi
@@ -93,9 +105,11 @@ class Koi {
         }
     }
 
-
-    setDesiredLocation(newPoint) {
-        this.desiredLocation = newPoint
+    update() {
+        this.updateDesiredLocation();
+        this.moveHeadTowardsGoal();
+        this.moveBodyAfterChangeInHead();
+        this.draw();
     }
 
 
@@ -123,24 +137,24 @@ class Koi {
         /*
         // Start drawing the koi fish
         let verticies = []; // Will hold the outline of the koi
-        verticies.push(add( this.points[0], mult(KOI_BODY_SIZES[0], rotate2d(-90, this.directions[0])))); // These all go around the head of the fish, this is left side
-        verticies.push(add( this.points[0], mult(KOI_BODY_SIZES[0], rotate2d(-45, this.directions[0])))); // Left corner (45 degrees)
+        verticies.push(add( this.points[0], mult(KOI_BODY_SIZES[0], rotate2d(Math.PI * (-1/2), this.directions[0])))); // These all go around the head of the fish, this is left side
+        verticies.push(add( this.points[0], mult(KOI_BODY_SIZES[0], rotate2d(Math.PI * (-1/4), this.directions[0])))); // Left corner (45 degrees)
         verticies.push(add( this.points[0], mult(KOI_BODY_SIZES[0], this.directions[0])));                // Top of head/ forward facing point
-        verticies.push(add( this.points[0], mult(KOI_BODY_SIZES[0], rotate2d(45, this.directions[0]))));  // Right corner (45 degrees)
-        verticies.push(add( this.points[0], mult(KOI_BODY_SIZES[0], rotate2d(90, this.directions[0]))));  // Rightmost side 
+        verticies.push(add( this.points[0], mult(KOI_BODY_SIZES[0], rotate2d(Math.PI/4, this.directions[0]))));  // Right corner (45 degrees)
+        verticies.push(add( this.points[0], mult(KOI_BODY_SIZES[0], rotate2d(Math.PI/2, this.directions[0]))));  // Rightmost side 
 
         // Go down right side of the fish
         for (let i = 1; i < KOI_LENGTH; i++) {
-            verticies.push(add( this.points[i], mult(KOI_BODY_SIZES[i], rotate2d(-90, this.directions[i])))); 
+            verticies.push(add( this.points[i], mult(KOI_BODY_SIZES[i], rotate2d(Math.PI * (-1/2), this.directions[i])))); 
         }
 
-        verticies.push(add( this.points[KOI_LENGTH - 1], mult(KOI_BODY_SIZES[KOI_LENGTH - 1], rotate2d(135, this.directions[KOI_LENGTH-1]))));  // Add the tail, right side
+        verticies.push(add( this.points[KOI_LENGTH - 1], mult(KOI_BODY_SIZES[KOI_LENGTH - 1], rotate2d(Math.PI * (3/4), this.directions[KOI_LENGTH-1]))));  // Add the tail, right side
         verticies.push(add( this.points[KOI_LENGTH - 1], mult(KOI_BODY_SIZES[KOI_LENGTH - 1], negate(this.directions[0]))));                    // Backmost point
-        verticies.push(add( this.points[KOI_LENGTH - 1], mult(KOI_BODY_SIZES[KOI_LENGTH - 1], rotate2d(-135, this.directions[KOI_LENGTH-1])))); // left side
+        verticies.push(add( this.points[KOI_LENGTH - 1], mult(KOI_BODY_SIZES[KOI_LENGTH - 1], rotate2d(Math.PI * (-3/4), this.directions[KOI_LENGTH-1])))); // left side
 
         // Now go around the tail up left side
         for (let i = KOI_LENGTH - 1; i > 0; i--) {
-            verticies.push(add( this.points[i], mult(KOI_BODY_SIZES[i], rotate2d(-90, this.directions[i])))); 
+            verticies.push(add( this.points[i], mult(KOI_BODY_SIZES[i], rotate2d(Math.PI * (-1/2), this.directions[i])))); 
         }
 
         // Now we need to make the path of the outline
@@ -163,55 +177,54 @@ class Koi {
     }   // End draw function
 
 
-    turnTowardsGoal() {
+    updateDesiredLocation() {
+        this.desiredLocation = vec2(mousePosX, mousePosY);
+    }
+
+    moveHeadTowardsGoal() {
+        // Set direction of head
         let angle = angleBetween(this.directions[0], subtract(this.desiredLocation, this.points[0])); // Angle between head and destination (radians)
         if (angle > 0.0001) {
             this.directions[0] = rotate2d(Math.min(KOI_MAX_ROTATION, angle), this.directions[0]);
         } else if (angle < 0.0001) {
             this.directions[0] = rotate2d(Math.max(-1 * KOI_MAX_ROTATION, angle), this.directions[0]);
         }
-    }
 
-    updateDesiredLocation() {
-        this.desiredLocation = vec2(mousePosX, mousePosY);
-    }
+        // Set speed based on distance to goal
+        this.speed = (distance(this.desiredLocation, this.points[0]) < 20) ? 0 : KOI_DEFAULT_SPEED;
 
-    updateDirectionByDesiredAngle() {
-        if (this.desiredRotationAngle != 0) {
-            if (this.desiredRotationAngle > 0) {
-                this.directions[0] = rotate2d(this.rotationSpeed, this.directions[0]);
-                this.desiredRotationAngle = (this.desiredRotationAngle - this.rotationSpeed < 0) ? 0 : this.desiredRotationAngle - this.rotationSpeed;
-            } else {
-                this.directions[0] = rotate2d(-1 * this.rotationSpeed, this.directions[0]);
-                this.desiredRotationAngle = (this.desiredRotationAngle + this.rotationSpeed > 0) ? 0 : this.desiredRotationAngle + this.rotationSpeed;
-            }
-        }
-    }
-
-
-    updateDesiredRotation() {
-        if (Math.floor(Math.random() * KOI_DIRECTION_CHANGE_FREQUENCY) != 1) return;
-        let x = Math.floor(Math.random * innerWidth) - this.points[0][0];
-        let y = Math.floor(Math.random * innerHeight) - this.points[0][1];
-        let theta = Math.floor(degrees(Math.atan(y/x)));
-        if (Math.random() > 0.50) {
-            theta = -1 * (360 - theta);
-        }
-        this.desiredRotationAngle = theta;
-    }
-    
-
-    moveHeadAndUpdatePoints() {
-        if (distance(this.desiredLocation, this.points[0]) < 20) {
-            this.speed = 0;
-        } else {
-            this.speed = KOI_DEFAULT_SPEED;
-        }
+        // Update head's location
         this.points[0] = add(this.points[0], mult(this.speed, this.directions[0]));
+    }
+
+    moveBodyAfterChangeInHead() {
+        
+        // Now update the rest of the body from the change in the head
         for (let i = 1; i < KOI_LENGTH; i++) {
             let newDirection = normalize(subtract(this.points[i-1], this.points[i]));
+            newDirection = this.constrainAngle(newDirection, this.directions[i-1], KOI_BODY_MAX_ANGLE);
             this.directions[i] = newDirection;
-            this.points[i] = add(this.points[i-1], mult(KOI_BODY_SIZES[i-1], negate(newDirection)));
+            this.points[i] = add(this.points[i-1], setMagnitude(KOI_BODY_SIZES[i-1], negate(newDirection)));
+        }
+    }
+
+    // Ensure the distance between vertices = constraint
+    constrainDistance(vertex, anchor, constraint) {
+        return setMagnitude(constraint, add(anchor, sub(vertex, anchor)));
+    }
+
+    // Ensure that the angle of flexion between verticies cannot be too acute
+    // Returns a vector adjusted by the proper angle
+    constrainAngle(vertex, anchor, constraint) {
+
+        let angle = angleBetween(negate(vertex), anchor);
+        if (Math.abs(angle) > constraint) return vertex; // Angle is good so return vector
+
+        if (angle > 0) {
+            return negate(rotate2d(-1 * constraint, anchor)); // Angle is bad, rotate by constraint clockwise
+        }
+        if (angle < 0) {
+            return negate(rotate2d(constraint, anchor)); // Angle bad, rotate counter clockwise
         }
     }
 
@@ -233,13 +246,12 @@ function initializeFish() {
 
 function animate() {
     requestAnimationFrame(animate);
-    c.clearRect(0,0,innerWidth,innerHeight);
-    c.fillStyle = "#243642";
-    c.fillRect(0,0,innerWidth,innerHeight);
-    koi.updateDesiredLocation();
-    koi.turnTowardsGoal();
-    koi.moveHeadAndUpdatePoints();
-    koi.draw();
+    if (boolAnimate) {
+        c.clearRect(0,0,innerWidth,innerHeight);
+        c.fillStyle = "#243642";
+        c.fillRect(0,0,innerWidth,innerHeight);
+        koi.update();
+    }
 }
 var koi = initializeFish();
 //koi.updateDesiredRotation();

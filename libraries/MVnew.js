@@ -504,27 +504,24 @@ function distance(vecA, vecB) {
   return Math.sqrt(Math.pow(vecB[0] - vecA[0], 2) + Math.pow(vecB[1] - vecA[1], 2));
 }
 
+function setMagnitude(mag, vec) {
+  return mult(mag, normalize(vec));
+}
+
 function angleBetween(vecA, vecB) {
   return Math.atan2((vecA[0]*vecB[1])-(vecA[1]*vecB[0]), (vecA[0]*vecB[0])+(vecA[1]*vecB[1]));
 }
 
-function rotate2dRadians(angle, vector) {
+/**
+ * @param {*} angle RADIANS ONLY
+ * @param {*} vector rotated vector
+ */
+function rotate2d(angle, vector) {
   if (vector.type != 'vec2') throw "rotate: vector is not a vec2";
   var result = new Array(2);
   result.type = 'vec2';
   let cos = Math.cos(angle);
   let sin = Math.sin(angle);
-  result[0] = (cos * vector[0]) - (sin * vector[1]);
-  result[1] = (sin * vector[0]) + (cos * vector[1]);
-  return result;
-}
-
-function rotate2d(angle, vector) {
-  if (vector.type != 'vec2') throw "rotate: vector is not a vec2";
-  var result = new Array(2);
-  result.type = 'vec2';
-  let cos = Math.cos(radians(angle));
-  let sin = Math.sin(radians(angle));
   result[0] = (cos * vector[0]) - (sin * vector[1]);
   result[1] = (sin * vector[0]) + (cos * vector[1]);
   return result;
