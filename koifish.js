@@ -64,7 +64,7 @@ onkeydown = (event) => {};
 // ============================= DEFINE VARIABLES ==============================
 
 const KOI_LENGTH = 9; // Length of koi 
-const KOI_BODY_SIZES = [52, 53, 47, 36, 25, 20, 13, 8, 4]; // Adjusts Koi body sizes MAYBE ADD 3 AND 2 TO 2ND AND 3RD POINTS? SEE PHOTO AFTER ADDING HEAD
+const KOI_BODY_SIZES = [54, 55, 47, 36, 25, 20, 13, 8, 4]; // Adjusts Koi body sizes MAYBE ADD 3 AND 2 TO 2ND AND 3RD POINTS? SEE PHOTO AFTER ADDING HEAD
 const KOI_DIRECTION_CHANGE_FREQUENCY = 300; // Higher number is less frequent
 const KOI_DEFAULT_SPEED = 4;
 const KOI_MAX_ROTATION = radians(4); // Max degrees of rotation per frame
@@ -268,7 +268,7 @@ class Koi {
         let mouth = add(this.points[0], mult(KOI_BODY_SIZES[0] + 16, this.directions[1]));
         this.circleAt(leftCheek[0], leftCheek[1], "pink");
         this.circleAt(rightCheek[0], rightCheek[1], "green");
-        this.circleAt(mouth[0], mouth[1], "black");
+        //this.circleAt(mouth[0], mouth[1], "black");
 
         let headToEllipseCenter = 30;
 
@@ -283,50 +283,101 @@ class Koi {
         let cheekYRadius = 22;
         let xAxis = vec2(1,0);
         let ellipseRotation = 3;
+        
 
         // find the angle of rotation for the ellipses, from x-axis
         let rightRotation = angleBetween(xAxis, subtract(rightCheek, mouth)) - radians(ellipseRotation);
-        c.beginPath();
-        c.fillStyle = "white";
-        c.ellipse(rightCenter[0], rightCenter[1], cheekXRadius, cheekYRadius, rightRotation, 0, Math.PI*2);
-        //c.fill();
-        c.closePath();
-        c.beginPath();
-        c.ellipse(rightCenter[0], rightCenter[1], cheekXRadius, cheekYRadius, rightRotation, Math.PI * (5/24), Math.PI, true);
-        c.strokeStyle = "black";
-        c.lineWidth = 3;
-        c.stroke();
-        c.closePath();
-
         let leftRotation = angleBetween(xAxis, subtract(leftCheek, mouth)) + radians(ellipseRotation);
-        c.beginPath();
-        c.fillStyle="white";
-        c.ellipse(leftCenter[0], leftCenter[1], cheekXRadius, cheekYRadius, leftRotation, 0, Math.PI*2);
-        //c.fill();
-        c.closePath();
-        c.beginPath();
-        c.ellipse(leftCenter[0], leftCenter[1], cheekXRadius, cheekYRadius, leftRotation, Math.PI * (-5/24), Math.PI);
-        c.strokeStyle = "black";
-        c.lineWidth = 3;
-        c.stroke();
-        c.closePath();
 
-        let mouthRotation = Math.PI * (11/16);
-        let mouthDistance = 27;
+        let mouthRotation = Math.PI * (45/64); //11/16
+        let mouthDistance = 31; //27
         // Find edges of mouth
         let rightMouth = add(mouth, rotate2d(mouthRotation, mult(mouthDistance, this.directions[1])));
         let leftMouth = add(mouth, rotate2d(-1 * mouthRotation, mult(mouthDistance, this.directions[1])));
-        this.circleAt(rightMouth[0], rightMouth[1], "purple");
-        this.circleAt(leftMouth[0], leftMouth[1], "purple");
+        //this.circleAt(rightMouth[0], rightMouth[1], "purple");
+        //this.circleAt(leftMouth[0], leftMouth[1], "purple");
         
         // Now get control points
-        let mouthControlRotation = radians(10);
-        let mouthControlDistance = 20;
+        let mouthControlRotation = radians(11);
+        let mouthControlDistance = 19;
         let rightMouthControl = add(rightMouth, mult(mouthControlDistance, rotate2d(mouthControlRotation, this.directions[1])));
         let leftMouthControl = add(leftMouth, mult(mouthControlDistance, rotate2d(-1 * mouthControlRotation, this.directions[1])))
-        this.circleAt(rightMouthControl[0], rightMouthControl[1], 'purple');
-        this.circleAt(leftMouthControl[0], leftMouthControl[1], 'purple');
+        //this.circleAt(rightMouthControl[0], rightMouthControl[1], 'purple');
+        //this.circleAt(leftMouthControl[0], leftMouthControl[1], 'purple');
 
+        // Define eye variables
+        let eyeRotation = Math.PI * (17/60);
+        let eyeDistance = 47;
+        let eyeEllipseRotation = rotate2d(radians(20), this.directions[1]);
+        let eyeXRadius = 6;
+        let eyeYRadius = 4;
+
+        // Draw eyes
+        let leftEye = add(this.points[0], mult(eyeDistance, rotate2d(-1 * eyeRotation, this.directions[1])));
+        let rightEye = add(this.points[0], mult(eyeDistance, rotate2d(eyeRotation, this.directions[1])));
+        let rightEyeEllipseRotation = angleBetween(xAxis, subtract(rightEye, this.points[0])) - radians(80);
+        let leftEyeEllipseRotation = angleBetween(xAxis, subtract(leftEye, this.points[0])) + radians(80);
+
+        this.circleAt(leftEye[0], leftEye[1], "black");
+        this.circleAt(rightEye[0], rightEye[1], "black");
+
+        // Draw whiskers
+        let whiskerEndDistance = 63;
+        let whiskerEndRotation = radians(44);
+        let whiskerControlDistance = 64;
+        let whiskerControlRotation = radians(34);
+        let rightWhiskerEnd = add(this.points[0], mult(whiskerEndDistance, rotate2d(whiskerEndRotation, this.directions[1])));
+        let rightWhiskerControl = add(this.points[0], mult(whiskerControlDistance, rotate2d(whiskerControlRotation, this.directions[1])));
+        //this.circleAt(rightWhiskerEnd[0], rightWhiskerEnd[1], "black");
+        //this.circleAt(rightWhiskerControl[0], rightWhiskerControl[1], "purple");
+        let leftWhiskerEnd = add(this.points[0], mult(whiskerEndDistance, rotate2d(whiskerEndRotation * (-1), this.directions[1])));
+        let leftWhiskerControl = add(this.points[0], mult(whiskerControlDistance, rotate2d(whiskerControlRotation * (-1), this.directions[1])));
+        //this.circleAt(leftWhiskerEnd[0], leftWhiskerEnd[1], "black");
+        let xyz = 2;
+        let rightWhiskerStart = add(rightMouth, mult(xyz, normalize(subtract(this.points[0], rightMouth))));
+        let leftWhiskerStart = add(leftMouth, mult(xyz, normalize(subtract(this.points[0], leftMouth))));
+
+        //
+        // ================ NOW THAT ALL POINTS ARE DEFINED DRAW KOI =======================
+        //
+    
+
+        // Draw right cheek
+        c.beginPath();
+        c.fillStyle = "white";
+        c.ellipse(rightCenter[0], rightCenter[1], cheekXRadius, cheekYRadius, rightRotation, 0, Math.PI*2);
+        c.fill();
+        c.closePath();
+        c.beginPath();
+        c.ellipse(rightCenter[0], rightCenter[1], cheekXRadius, cheekYRadius, rightRotation, Math.PI * (5/24), Math.PI * (240/176), true);
+        c.strokeStyle = "black";
+        c.lineWidth = 3;
+        c.stroke();
+        c.closePath();
+
+        // Draw left cheek
+        c.beginPath();
+        c.fillStyle="white";
+        c.ellipse(leftCenter[0], leftCenter[1], cheekXRadius, cheekYRadius, leftRotation, 0, Math.PI*2);
+        c.fill();
+        c.closePath();
+        c.beginPath();
+        c.ellipse(leftCenter[0], leftCenter[1], cheekXRadius, cheekYRadius, leftRotation, Math.PI * (-5/24), Math.PI * (-240/176));
+        c.strokeStyle = "black";
+        c.lineWidth = 3;
+        c.stroke();
+        c.closePath();
+
+        // Fill mouth
+        c.beginPath();
+        c.moveTo(rightMouth[0], rightMouth[1]);
+        c.bezierCurveTo(rightMouthControl[0], rightMouthControl[1], leftMouthControl[0], leftMouthControl[1], leftMouth[0], leftMouth[1]);
+        c.lineTo(rightMouth[0], rightMouth[1]);
+        c.fillStyle = "white";
+        c.fill();
+        c.closePath();
+
+        // Outline mouth
         c.beginPath();
         c.moveTo(rightMouth[0], rightMouth[1]);
         c.bezierCurveTo(rightMouthControl[0], rightMouthControl[1], leftMouthControl[0], leftMouthControl[1], leftMouth[0], leftMouth[1]);
@@ -334,6 +385,39 @@ class Koi {
         c.lineWidth = 3;
         c.stroke();
         c.closePath();
+
+        // Draw right eye
+        c.beginPath();
+        c.ellipse(rightEye[0], rightEye[1], eyeXRadius, eyeYRadius, rightEyeEllipseRotation, 0, Math.PI * 2);
+        c.fillStyle = "black";
+        c.fill();
+        c.closePath();
+
+        // Draw left eye
+        c.beginPath();
+        c.ellipse(leftEye[0], leftEye[1], eyeXRadius, eyeYRadius, leftEyeEllipseRotation, 0, Math.PI * 2);
+        c.fillStyle = "black";
+        c.fill();
+        c.closePath();
+
+        // Draw right whisker
+        c.beginPath();
+        c.moveTo(rightWhiskerStart[0], rightWhiskerStart[1]);
+        c.quadraticCurveTo(rightWhiskerControl[0], rightWhiskerControl[1], rightWhiskerEnd[0], rightWhiskerEnd[1]);
+        c.strokeStyle = "black";
+        c.lineWidth = 3;
+        c.stroke();
+        c.closePath();
+
+        // Draw left whisker
+        c.beginPath();
+        c.moveTo(leftWhiskerStart[0], leftWhiskerStart[1]);
+        c.quadraticCurveTo(leftWhiskerControl[0], leftWhiskerControl[1], leftWhiskerEnd[0], leftWhiskerEnd[1]);
+        c.strokeStyle = "black";
+        c.lineWidth = 3;
+        c.stroke();
+        c.closePath();
+
 
 
     }   // End draw function
